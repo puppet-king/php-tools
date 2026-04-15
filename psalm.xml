@@ -2,8 +2,8 @@
 <psalm
     errorLevel="1"
     findUnusedBaselineEntry="true"
-    findUnusedCode="false"
-    ensureOverrideAttribute="false"
+    ignoreInternalFunctionArgs="true"
+    ignoreInternalFunctionReturnTypes="true"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
@@ -22,14 +22,22 @@
 
     <!-- 抑制特定类型检查错误 -->
     <issueHandlers>
-        <!-- 允许外部库方法返回混合类型 -->
-        <MixedAssignment errorLevel="suppress" />
-        <MixedArgument errorLevel="suppress" />
-        <MixedArgumentTypeCoercion errorLevel="suppress" />
-        <MixedArrayOffset errorLevel="suppress" />
-        <MixedMethodCall errorLevel="suppress" />
-        <MixedReturnTypeCoercion errorLevel="suppress" />
-        <MissingClosureParamType errorLevel="suppress" />
-        <MissingClosureReturnType errorLevel="suppress" />
+        <InternalClass errorLevel="suppress" />
+        <InternalMethod errorLevel="suppress" />
+        <InternalProperty errorLevel="suppress" />
+
+        <!-- 针对 vendor 目录的报错降级或抑制 -->
+        <UnusedClass>
+            <errorLevel type="suppress">
+                <directory name="vendor" />
+            </errorLevel>
+        </UnusedClass>
+
+        <!-- 如果你还在报 vendor 里的某些类找不到或属性不存在 -->
+        <UndefinedClass>
+            <errorLevel type="suppress">
+                <directory name="vendor" />
+            </errorLevel>
+        </UndefinedClass>
     </issueHandlers>
 </psalm>

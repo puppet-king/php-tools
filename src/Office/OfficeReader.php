@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Office;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpWord\Element\AbstractElement;
 use PhpOffice\PhpWord\IOFactory as WordIOFactory;
 use RuntimeException;
 
@@ -28,18 +29,49 @@ final class OfficeReader
             throw new RuntimeException("File not found: $filePath");
         }
 
-        $phpWord = WordIOFactory::load($filePath);
-        $content = [];
+        $phpWord = \PhpOffice\PhpWord\IOFactory::load($filePath);
+        $content = "";
 
         foreach ($phpWord->getSections() as $section) {
             foreach ($section->getElements() as $element) {
-                if (method_exists($element, 'getText')) {
-                    $content[] = $element->getText();
-                }
+                $content .= $this->extractText($element) . "\n";
             }
         }
 
-        return implode("\n", $content);
+        return trim($content);
+    }
+
+    /**
+     * 递归提取元素中的文本
+     * @param AbstractElement $element
+     * @return string
+     */
+    private function extractText(AbstractElement $element): string
+    {
+        $text = "";
+
+        // 情况 A: 基础文本元素 (Text)
+        if (method_exists($element, 'getText')) {
+            $text .= $element->getText();
+        }
+        // 情况 B: 容器元素 (TextRun, Table, Cell, ListItem, etc.)
+        // 它们实现了 getElements() 方法
+        elseif (method_exists($element, 'getElements')) {
+            foreach ($element->getElements() as $childElement) {
+                $text .= $this->extractText($childElement);
+            }
+        }
+        // 情况 C: 表格特殊处理 (Table -> Row -> Cell)
+        elseif ($element instanceof \PhpOffice\PhpWord\Element\Table) {
+            foreach ($element->getRows() as $row) {
+                foreach ($row->getCells() as $cell) {
+                    $text .= $this->extractText($cell) . " "; // 单元格间加空格
+                }
+                $text .= "\n";
+            }
+        }
+
+        return $text;
     }
 
     /**

@@ -62,7 +62,6 @@ final class OfficeCommand extends Command
     {
         $path = (string) $input->getArgument('path');
         $format = (string) $input->getOption('format');
-        /** @var string|null */
         $sheetName = $input->getOption('sheet');
 
         // 验证路径是绝对路径
@@ -98,6 +97,7 @@ final class OfficeCommand extends Command
     private function handleDocx(string $path, string $format, OutputInterface $output): void
     {
         $content = $this->officeReader->readDocx($path);
+        print_r("handleDocx $path $content");
 
         if ($format === 'json') {
             $output->writeln(json_encode(['content' => $content], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
