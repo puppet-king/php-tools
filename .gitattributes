@@ -1,0 +1,5 @@
+* text eol=lf
+*.bat text eol=crlf
+
+# 明确指定 sh 文件使用 LF
+*.sh text eol=lf
